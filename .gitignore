@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+data/
+tts_output/
+*.db
+.DS_Store
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+node_modules/

@@ -1,0 +1,38 @@
+services:
+  # Backend API
+  - type: web
+    name: ncert-chatbot-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    startCommand: uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:///./data/ncert_chatbot.db
+      - key: CHROMA_DB_PATH
+        value: ./data/chroma_db
+      - key: TTS_OUTPUT_DIR
+        value: ./tts_output
+      - key: EMBEDDING_MODEL
+        value: BAAI/bge-small-en
+      - key: USE_CLAUDE
+        value: "false"
+      - key: PORT
+        value: "8000"
+    disk:
+      name: ncert-data
+      mountPath: /app/data
+      sizeGB: 1
+
+  # Frontend
+  - type: web
+    name: ncert-chatbot-frontend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    startCommand: streamlit run frontend/app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: FASTAPI_URL
+        value: https://ncert-chatbot-backend.onrender.com
+      - key: PORT
+        value: "8501"
