@@ -4,7 +4,7 @@ WORKDIR /app
 
 # System dependencies
 RUN apt-get update && apt-get install -y \
-    curl build-essential libsndfile1 ffmpeg \
+    curl build-essential supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Python dependencies
@@ -18,6 +18,12 @@ COPY . .
 RUN mkdir -p data/chroma_db tts_output
 
 # Ingest NCERT content at build time
-RUN python scripts/ingest_ncert.py
+RUN python scripts/ingest_ncert.py || echo "Ingest skipped"
 
-EXPOSE 8000 8501
+# Supervisor config to run both services
+RUN mkdir -p /etc/supervisor/conf.d
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+EXPOSE 8501
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
